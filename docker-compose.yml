@@ -1,0 +1,29 @@
+# Docker Compose opcional — sobe um PostgreSQL local para desenvolvimento.
+# Uso: docker compose up -d
+# Depois, aponte DATABASE_URL/DIRECT_URL no .env para:
+#   postgresql://postgres:postgres@localhost:5432/barberless_dev
+#
+# Em produção/homologação o banco continua sendo o Supabase, conforme
+# definido na Fase 4 — este compose serve apenas para desenvolvimento
+# local sem depender de rede externa.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: barberless-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: barberless_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - barberless_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  barberless_postgres_data:

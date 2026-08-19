@@ -1,0 +1,47 @@
+// BarberLess — Prisma Schema
+// Fase 4 — Fundação Técnica.
+//
+// Arquitetura Prisma 7 (driver adapters): a URL de conexão NÃO fica mais
+// neste arquivo — schemas do Prisma 7 não aceitam mais `url`/`directUrl`
+// no bloco `datasource`. A conexão de runtime é montada em
+// `src/plugins/prisma.ts` via `@prisma/adapter-pg` (pg.Pool + PrismaPg),
+// usando DATABASE_URL. A conexão usada pela CLI (migrate/studio/seed)
+// fica em `prisma.config.ts`, usando DIRECT_URL.
+//
+// O output do client fica em `src/generated/prisma` — DENTRO da árvore
+// TypeScript compilada (rootDir = src). Isso é necessário: o Prisma 7
+// gera arquivos `.ts` reais (não apenas `.js`/`.d.ts` pré-compilados)
+// que precisam ser processados pelo próprio `tsc` do projeto. Se o
+// output ficasse fora de `rootDir`, `tsc` rejeita com
+// `TS6059: file is not under rootDir`. Com o output dentro de `src/`, o
+// `tsc` inclui, typecheca e compila os arquivos gerados automaticamente
+// para `dist/generated/prisma/` durante `npm run build` — o mesmo
+// caminho relativo (`../generated/prisma/client`) funciona tanto em
+// desenvolvimento (`tsx`, executando direto de `src/`) quanto em
+// produção (`node dist/server.js`, com `dist/` espelhando `src/`).
+//
+// Único model desta fase: `SystemSetting`, técnico, sem dados de negócio.
+// Existe para validar de ponta a ponta o Prisma Client real, a migration
+// real e o seed real — não para representar nenhuma entidade do domínio
+// (User, Customer, Professional, Appointment, Service, Payment, etc.),
+// que só serão modelados nas fases seguintes.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SystemSetting {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}

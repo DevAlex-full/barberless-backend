@@ -50,6 +50,12 @@ export default fp(
     ]);
 
     const { pool, adapter } = createPrismaAdapter(opts.databaseUrl);
+
+    if (!adapter) {
+      fastify.log.warn('Não foi possível criar o adapter do Prisma.');
+      return;
+    }
+
     const prisma = new PrismaClient({ adapter });
 
     await prisma.$connect();
@@ -58,7 +64,9 @@ export default fp(
 
     fastify.addHook('onClose', async (instance) => {
       await instance.prisma.$disconnect();
-      await pool.end();
+      if (pool) {
+        await pool.end();
+      }
     });
   },
   { name: 'prisma-plugin' },

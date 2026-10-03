@@ -28,8 +28,6 @@ export async function buildTestApp(
     ...process.env,
     NODE_ENV: 'test',
     SWAGGER_ENABLED: 'false',
-    DATABASE_URL: undefined,
-    DIRECT_URL: undefined,
     ...envOverrides,
   });
 

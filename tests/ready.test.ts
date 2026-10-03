@@ -50,11 +50,15 @@ describe('GET /ready', () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   it('reporta database "skipped" quando DATABASE_URL não está configurada', async () => {
-    app = await buildTestApp();
+    app = await buildTestApp({
+      DATABASE_URL: undefined,
+    });
 
     const response = await app.inject({ method: 'GET', url: '/ready' });
 

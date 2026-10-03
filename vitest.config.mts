@@ -1,6 +1,12 @@
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
@@ -9,7 +15,7 @@ export default defineConfig({
     // Fastify completa (buildApp) — para uma suíte pequena como esta (8
     // arquivos), o custo de o Vitest abrir múltiplas threads/workers do
     // SO costuma superar o ganho de paralelismo, e é sensivelmente mais
-    // caro no Windows (criação de thread/processo é mais lenta lá do
+    // caro no Windows (criação de thread/processo é mais lenta lá
     // que em Linux/macOS). Rodar tudo em uma única thread evita esse
     // overhead sem sacrificar isolamento entre arquivos (o Vitest ainda
     // reinicia o módulo por arquivo).

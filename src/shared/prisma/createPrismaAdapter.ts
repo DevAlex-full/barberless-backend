@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@/generated/prisma/client';
 
 export interface PrismaAdapterHandle {
   pool: Pool;
@@ -27,7 +28,7 @@ export interface PrismaAdapterHandle {
  * (nunca `NODE_TLS_REJECT_UNAUTHORIZED=0`) nem enfraquecimento via
  * `sslmode=disable` na connection string. Qualquer outra conexão TLS
  * feita pela aplicação (ex.: chamadas HTTP a serviços externos em fases
- * futuras) continua com verificação de certificado completa.
+ * futuras) continua com verificação completa da cadeia.
  *
  * Esta é uma decisão **temporária**, documentada em
  * `docs/phase-4-report.md`: o caminho definitivo é apontar `ssl.ca`
@@ -35,7 +36,15 @@ export interface PrismaAdapterHandle {
  * `rejectUnauthorized` para `true` (verificação completa da cadeia).
  * Isso não foi implementado nesta fase por instrução explícita.
  */
-export function createPrismaAdapter(connectionString: string): PrismaAdapterHandle {
+export function createPrismaAdapter(connectionString: string = process.env.DATABASE_URL || '') {
+  if (!connectionString) {
+    return {
+      pool: null,
+      adapter: null,
+      client: null,
+    };
+  }
+
   const pool = new Pool({
     connectionString,
     ssl: {
@@ -44,6 +53,7 @@ export function createPrismaAdapter(connectionString: string): PrismaAdapterHand
   });
 
   const adapter = new PrismaPg(pool);
+  const client = new PrismaClient({ adapter });
 
-  return { pool, adapter };
+  return { pool, adapter, client };
 }

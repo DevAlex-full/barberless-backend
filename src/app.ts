@@ -6,6 +6,7 @@ import securityPlugin from './plugins/security';
 import swaggerPlugin from './plugins/swagger';
 import healthRoutes from './modules/health/health.routes';
 import versionRoute from './routes/version.route';
+import { authRoutes } from './modules/auth/auth.routes';
 import { errorHandler } from './shared/http/errorHandler';
 import { notFoundHandler } from './shared/http/notFoundHandler';
 
@@ -73,6 +74,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   await app.register(prismaPlugin, { databaseUrl: env.DATABASE_URL });
 
+  // Auth routes must be registered before any protected routes
+  await app.register(authRoutes, { prefix: '/auth' });
   await app.register(healthRoutes);
   await app.register(versionRoute);
 
